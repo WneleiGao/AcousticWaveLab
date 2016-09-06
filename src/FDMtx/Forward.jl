@@ -19,14 +19,15 @@ function OneStepForward!(spt2::SnapShot, spt1::SnapShot, fidMtx::FidMtx)
 end
 
 """
-    MultiStepForward(pos_rec, src, fidMtx)
+    MultiStepForward(pos_rec, srcs, fidMtx)
 
-Multiple time step forward modeling of acoustic wave field, generate one shot gather
+Multiple time step forward modeling of acoustic wave field, generate one shot gather, support
+inject multiple sources simutaneously
 
 # Arguments
 * `pos_rec :: Array{Int64,2}`: receivers' location, first column specify vertical index of receivers
 second column specify horizontal index.
-* `src :: Source`: composite type for point source injection
+* `srcs :: Array{Source,1}`: composite type for point source injection.
 * `fidMtx :: FidMtx`: composite type of sparse partial differential matrix
 
 # Output
@@ -40,7 +41,7 @@ function MultiStepForward(pos::Array{Int64,2}, src::Array{Source,1}, fidMtx::Fid
        Nz = nz + 2*ext
     elseif iflag == 2
        zupper =    0
-       Nz = nx +   ext
+       Nz = nz +   ext
     end
     Nx = nx + 2*ext
     dt = fidMtx.dt
@@ -67,7 +68,20 @@ function MultiStepForward(pos::Array{Int64,2}, src::Array{Source,1}, fidMtx::Fid
     return shot
 end
 
+"""
+    MultiStepForward(pos_rec, src, fidMtx)
 
+Multiple time step forward modeling of acoustic wave field, generate one shot gather
+
+# Arguments
+* `pos_rec :: Array{Int64,2}`: receivers' location, first column specify vertical index of receivers
+second column specify horizontal index.
+* `src :: Source`: composite type for point source injection.
+* `fidMtx :: FidMtx`: composite type of sparse partial differential matrix
+
+# Output
+* `shot :: Shot`: composite type of common shot gather
+"""
 function MultiStepForward(pos::Array{Int64,2}, src::Source, fidMtx::FidMtx; tmax=2.0, interval=500, print_flag=false)
     nz = fidMtx.nz ; nx = fidMtx.nx;
     ext= fidMtx.ext; iflag = fidMtx.iflag;
@@ -76,7 +90,7 @@ function MultiStepForward(pos::Array{Int64,2}, src::Source, fidMtx::FidMtx; tmax
        Nz = nz + 2*ext
     elseif iflag == 2
        zupper = 0
-       Nz = nx +   ext
+       Nz = nz +   ext
     end
     Nx = nx + 2*ext
     dt = fidMtx.dt
@@ -104,7 +118,20 @@ function MultiStepForward(pos::Array{Int64,2}, src::Source, fidMtx::FidMtx; tmax
     return shot
 end
 
-# save tge full wve field to hard drive
+"""
+    MultiStepForward(path, srcs, fidMtx)
+
+Multiple time step forward modeling of acoustic wave field, generate one shot gather, support
+inject multiple sources simutaneously
+
+# Arguments
+* `path :: ASCIIString`: the directory for writing binary wavefiled
+* `srcs :: Array{Source,1}`: array of composite source type
+* `fidMtx :: FidMtx`: composite type of sparse partial differential matrix
+
+# Output
+* `shot :: Shot`: composite type of common shot gather
+"""
 function MultiStepForward(path::ASCIIString, src::Array{Source,1}, fidMtx::FidMtx; tmax=2.0, interval=500, print_flag=false)
     nz = fidMtx.nz ; nx    = fidMtx.nx;
     ext= fidMtx.ext; iflag = fidMtx.iflag;
@@ -133,42 +160,6 @@ function MultiStepForward(path::ASCIIString, src::Array{Source,1}, fidMtx::FidMt
 end
 
 
-# inject source as SnapShot
-# function MultiStepForward(pos::Array{Int64,2}, path::ASCIIString, fidMtx::FidMtx; tmax=1.0, interval=500, print_flag=false)
-#     nz = fidMtx.nz ; nx    = fidMtx.nx;
-#     ext= fidMtx.ext; iflag = fidMtx.iflag;
-#     if iflag == 1
-#        zupper = ext
-#        Nz = nz + 2*ext
-#     elseif iflag == 2
-#        zupper = 0
-#        Nz = nx +   ext
-#     end
-#     Nx = nx + 2*ext
-#     dt = fidMtx.dt
-#     nt = round(Int64, tmax/dt+1)
-#     ntsrc = numberOfSnapShots(path)
-#     shot = InitShot(0, 0, pos, 0.0, nt, dt)
-#     spt1 = readSnapShot(path, 1)
-#     spt2shot!(shot, spt1, Nz, Nx, ext, zupper)
-#     spt2 = InitSnapShot(0, 0, nz, nx, ext, iflag, dt, 1)
-#     for it = 2: nt
-#         OneStepForward!(spt2, spt1, fidMtx)
-#         if it <= ntsrc
-#            spt1 = readSnapShot(path, it)
-#            spt2 = spt2 + spt1
-#         end
-#         copy(spt1, spt2)
-#         spt2shot!(shot, spt1, Nz, Nx, ext, zupper)
-#         if print_flag
-#            if mod(it, interval) == 0
-#               println("the current step: $it")
-#            end
-#         end
-#     end
-#     return shot
-# end
-
 # inject sources as SrcSpt, return shot
 function MultiStepForward(pos::Array{Int64,2}, path::ASCIIString, fidMtx::FidMtx; tmax=1.0, interval=500, print_flag=false)
     nz = fidMtx.nz ; nx    = fidMtx.nx;
@@ -178,7 +169,7 @@ function MultiStepForward(pos::Array{Int64,2}, path::ASCIIString, fidMtx::FidMtx
        Nz = nz + 2*ext
     elseif iflag == 2
        zupper = 0
-       Nz = nx +   ext
+       Nz = nz +   ext
     end
     Nx = nx + 2*ext
     dt = fidMtx.dt
@@ -217,7 +208,7 @@ function MultiStepForward(pos::Array{Int64,2}, w::Array{Float64,1}, dis::Array{F
        Nz = nz + 2*ext
     elseif iflag == 2
        zupper = 0
-       Nz = nx +   ext
+       Nz = nz +   ext
     end
     Nx = nx + 2*ext
     dt = fidMtx.dt
@@ -269,4 +260,39 @@ end
 #     end
 #     close(fid)
 #     return nothing
+# end
+
+# function MultiStepForward(pos::Array{Int64,2}, path::ASCIIString, fidMtx::FidMtx; tmax=1.0, interval=500, print_flag=false)
+#     nz = fidMtx.nz ; nx    = fidMtx.nx;
+#     ext= fidMtx.ext; iflag = fidMtx.iflag;
+#     if iflag == 1
+#        zupper = ext
+#        Nz = nz + 2*ext
+#     elseif iflag == 2
+#        zupper = 0
+#        Nz = nx +   ext
+#     end
+#     Nx = nx + 2*ext
+#     dt = fidMtx.dt
+#     nt = round(Int64, tmax/dt+1)
+#     ntsrc = numberOfSnapShots(path)
+#     shot = InitShot(0, 0, pos, 0.0, nt, dt)
+#     spt1 = readSnapShot(path, 1)
+#     spt2shot!(shot, spt1, Nz, Nx, ext, zupper)
+#     spt2 = InitSnapShot(0, 0, nz, nx, ext, iflag, dt, 1)
+#     for it = 2: nt
+#         OneStepForward!(spt2, spt1, fidMtx)
+#         if it <= ntsrc
+#            spt1 = readSnapShot(path, it)
+#            spt2 = spt2 + spt1
+#         end
+#         copy(spt1, spt2)
+#         spt2shot!(shot, spt1, Nz, Nx, ext, zupper)
+#         if print_flag
+#            if mod(it, interval) == 0
+#               println("the current step: $it")
+#            end
+#         end
+#     end
+#     return shot
 # end

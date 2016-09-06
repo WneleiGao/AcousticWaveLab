@@ -148,8 +148,8 @@ function InitCpml(nz::Int64, nx::Int64, ext::Int64, vmax::Float64, dz::Float64, 
          end
          #  right
          for ix = nx+ext+1 : Nx
-             vx[:,ix] = -1.5 * vmax/ext * log(R) * ((ix-nx-ext)/ext)^ll
-             px[:,ix] = -1.5 * vmax/ext * log(R) * ((ix-nx-ext)/ext)^ll
+             vx[:,ix] = -1.5 * vmax/(ext*dx) * log(R) * ((ix-nx-ext)/ext)^ll
+             px[:,ix] = -1.5 * vmax/(ext*dx) * log(R) * ((ix-nx-ext)/ext)^ll
          end
       end
       Cpml = PMLCoef(vz, vx, pz, px)

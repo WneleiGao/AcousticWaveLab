@@ -1,4 +1,3 @@
-using AcousticWaveLab
 using Base.Test
 
-include("test_modeling")
+include("test_acoustic.jl")

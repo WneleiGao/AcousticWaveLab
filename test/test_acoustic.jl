@@ -1,4 +1,22 @@
-# using AcousticWave
+# ==============================================================================
+using PyPlot, AcousticWaveLab
+nz = 201; nx = 373; ext = 30; iflag = 2; dz = 10.; dx = 10.; dt = 1e-3;
+v  = 3000. * ones(nz, nx);
+v[101:end, :] = 4000.
+# initialize source term
+pos = [1 180]; f0 = 30.0; ot = [0.0];
+src = InitSources(pos, f0, ot, dt);
+
+# discretize spatial derivative operator
+vmax = maximum(v); vmin = minimum(v);
+fidMtx = InitFidMtx(nz, nx, ext, iflag, dz, dx, dt, vmax, vmin, f0, v);
+
+ix = collect(1:5:nx); iz = 1 * ones(Int64, length(ix));
+pos = hcat(iz, ix)
+shot = MultiStepForward(pos, src[1], fidMtx, print_flag=true)
+SeisPlot(shot.d, pclip=98)
+# ==============================================================================
+# using PyPlot, AcousticWaveLab
 # nz = 201; nx = 201; ext = 20; iflag = 1; dz = 10.; dx = 10.; dt = 2e-3;
 # v  = 3000. * ones(nz, nx);
 # # initialize source term
@@ -54,8 +72,6 @@
 #
 # x'*x1 - y'*y1
 
-
-
 # ==============================================================================
 # nz = 201; nx = 201; dt = 2e-3; iflag = 1; ext = 20
 # if iflag ==1
@@ -92,27 +108,6 @@
 # y1 = vec(shot2.d)
 # x'*x1 - y'*y1
 
-
-# ==============================================================================
-# using AcousticWave
-# nz = 201; nx = 201; ext = 20; iflag = 1; dz = 10.; dx = 10.; dt = 2e-3;
-# v  = 3000. * ones(nz, nx);
-# # initialize source term
-# pos = [101 101]; f0 = 30.0; ot = [0.0];
-# src = InitSources(pos, f0, ot, dt);
-# # discretize spatial derivative operator
-# vmax = maximum(v); vmin = minimum(v);
-# fidMtx = InitFidMtx(nz, nx, ext, iflag, dz, dx, dt, vmax, vmin, f0, v);
-# path = "/Users/wenlei/Desktop/acoustic.bin"
-# MultiStepForward(path, src, fidMtx, tmax=1.0);
-#
-# iz = 5 * ones(Int64, 201); ix = collect(1:201);
-# pos = hcat(iz, ix)
-# shot = fullWfd2Shot(pos, path);
-# shot1 = MultiStepForward(pos, src[1], fidMtx, tmax=1.0)
-#
-# path = "/Users/wenlei/Desktop/adjoint.bin"
-# MultiStepAdjoint!(path, shot, fidMtx)
 
 # ==============================================================================
 # using AcousticWave

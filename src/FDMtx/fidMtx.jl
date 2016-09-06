@@ -19,10 +19,10 @@ end
 
 function DispStable!(vmax::Float64, vmin::Float64, f0::Float64, dz::Float64, dx::Float64, dt::Float64)
     h = vmin / 5 / f0
-    println("maximum acceptable grid size: $h")
-    tt = 6*h / (7*sqrt(3)*vmax)
-    println("maximum acceptable time step: $tt")
+    tt = 6*dx / (7*sqrt(3)*vmax)
     if dx >= h || dz >= h || dt >= tt
+       println("maximum acceptable grid size: $h")
+       println("maximum acceptable time step: $tt")
        error("unstable or frequency dispersion")
     end
     return nothing
