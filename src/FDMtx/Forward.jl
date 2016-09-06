@@ -159,7 +159,6 @@ function MultiStepForward(path::ASCIIString, src::Array{Source,1}, fidMtx::FidMt
     return nothing
 end
 
-
 # inject sources as SrcSpt, return shot
 function MultiStepForward(pos::Array{Int64,2}, path::ASCIIString, fidMtx::FidMtx; tmax=1.0, interval=500, print_flag=false)
     nz = fidMtx.nz ; nx    = fidMtx.nx;
